@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TripNest - Customer Dashboard</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background-color: #343a40;
+        }
+        .sidebar .nav-link {
+            color: #fff;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #495057;
+        }
+        .sidebar .nav-link.active {
+            background-color: #007bff;
+        }
+        .dashboard-card {
+            transition: transform 0.2s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+        .welcome-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .ride-option {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .ride-option:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .ride-option.selected {
+            border-color: #007bff;
+            background-color: #e7f3ff;
+        }
+        .ride-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .modal-content {
+            border-radius: 15px;
+        }
+        .map-placeholder {
+            background-color: #e9ecef;
+            height: 200px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-confirmed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-completed {
+            background-color: #007bff;
+            color: white;
+        }
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .confirmation-banner {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .payment-method {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .payment-method:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .payment-method.selected {
+            border-color: #007bff;
+            background-color: #e7f3ff;
+        }
+        .payment-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        .scanner-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 15px;
+            border: 2px dashed #dee2e6;
+        }
+        .scanner {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 15px;
+            background: linear-gradient(45deg, #e0e0e0, #f5f5f5);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .scanner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #007bff;
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-taxi me-2"></i>
+                TripNest - Cab Booking
+            </a>
+            <div class="navbar-nav ms-auto">
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar me-2" id="userAvatar">JD</div>
+                    <span class="navbar-text me-3" id="userName">John Doe</span>
+                    <button class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-history me-2"></i>
+                                Ride History
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-user me-2"></i>
+                                Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-wallet me-2"></i>
+                                Wallet
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                Saved Places
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-star me-2"></i>
+                                Rewards
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Confirmation Banner -->
+                <div class="confirmation-banner" id="confirmationBanner">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle fa-2x me-3"></i>
+                        <div>
+                            <h4 class="mb-1">Ride Confirmed!</h4>
+                            <p class="mb-0" id="confirmationDetails">Your ride has been successfully booked</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Welcome Banner -->
+                <div class="welcome-banner rounded p-4 my-4">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h2 class="mb-1" id="welcomeMessage">Welcome back, John Doe!</h2>
+                            <p class="mb-0">Here's what's happening with your account today.</p>
+                        </div>
+                        <div class="col-auto">
+                            <div class="user-avatar" style="width: 60px; height: 60px; font-size: 24px;" id="welcomeAvatar">JD</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="row">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-primary shadow h-100 py-2 dashboard-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Pending Rides
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="pendingRidesCount">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2 dashboard-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            Confirmed Rides
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="confirmedRidesCount">2</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-info shadow h-100 py-2 dashboard-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                            Wallet Balance
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">$0.00</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-wallet fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-warning shadow h-100 py-2 dashboard-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                            Reward Points
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-gift fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-primary">Recent Rides</h6>
+                                <button class="btn btn-sm btn-outline-primary" id="refreshRidesBtn">
+                                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th>Ride ID</th>
+                                                <th>Date</th>
+                                                <th>Pickup</th>
+                                                <th>Destination</th>
+                                                <th>Ride Type</th>
+                                                <th>Amount</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="ridesTableBody">
+                                            <!-- Rides will be dynamically added here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3 mb-3">
+                                        <button class="btn btn-outline-primary btn-lg p-3 w-100" id="newRideBtn">
+                                            <i class="fas fa-taxi fa-2x mb-2"></i><br>
+                                            New Ride
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <button class="btn btn-outline-success btn-lg p-3 w-100" id="rideHistoryBtn">
+                                            <i class="fas fa-history fa-2x mb-2"></i><br>
+                                            Ride History
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <button class="btn btn-outline-info btn-lg p-3 w-100" id="updateProfileBtn">
+                                            <i class="fas fa-user-edit fa-2x mb-2"></i><br>
+                                            Update Profile
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <button class="btn btn-outline-warning btn-lg p-3 w-100" id="supportBtn">
+                                            <i class="fas fa-question-circle fa-2x mb-2"></i><br>
+                                            Support
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- New Ride Modal -->
+    <div class="modal fade" id="newRideModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Book a New Ride</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="map-placeholder">
+                        <i class="fas fa-map-marked-alt fa-3x text-muted"></i>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="pickupLocation" class="form-label">Pickup Location</label>
+                        <input type="text" class="form-control" id="pickupLocation" placeholder="Enter pickup address" value="Nagasandra">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="destination" class="form-label">Destination</label>
+                        <input type="text" class="form-control" id="destination" placeholder="Enter destination" value="International Airport Terminal 2">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Select Ride Type</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="ride-option" data-type="economy" data-price="15">
+                                    <div class="ride-icon text-success">
+                                        <i class="fas fa-car"></i>
+                                    </div>
+                                    <h6>Economy</h6>
+                                    <p class="small text-muted">Affordable everyday rides</p>
+                                    <p class="fw-bold">$12-18</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="ride-option" data-type="comfort" data-price="22">
+                                    <div class="ride-icon text-primary">
+                                        <i class="fas fa-car-side"></i>
+                                    </div>
+                                    <h6>Comfort</h6>
+                                    <p class="small text-muted">Extra legroom & comfort</p>
+                                    <p class="fw-bold">$18-25</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="ride-option" data-type="premium" data-price="35">
+                                    <div class="ride-icon text-warning">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <h6>Premium</h6>
+                                    <p class="small text-muted">Luxury vehicles</p>
+                                    <p class="fw-bold">$25-40</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="rideTime" class="form-label">Schedule Ride (Optional)</label>
+                        <input type="datetime-local" class="form-control" id="rideTime" value="2025-11-20T04:23">
+                    </div>
+
+                    <!-- Payment Methods Section -->
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        
+                        <!-- QR Scanner Option -->
+                        <div class="scanner-container">
+                            <h5>Scan to Pay</h5>
+                            <div class="scanner">
+                                <i class="fas fa-qrcode fa-3x text-muted"></i>
+                            </div>
+                            <p class="text-muted">Position the QR code within the frame to scan</p>
+                            <button class="btn btn-outline-primary btn-sm" id="activateScannerBtn">
+                                <i class="fas fa-camera me-1"></i> Activate Scanner
+                            </button>
+                        </div>
+                        
+                        <!-- Payment Options -->
+                        <div class="mt-3">
+                            <div class="payment-method" data-method="pay-after-ride">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-clock payment-icon text-primary"></i>
+                                    <div>
+                                        <h6 class="mb-1">Pay After Ride</h6>
+                                        <p class="small text-muted mb-0">Pay after your ride ends</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="payment-method" data-method="credit-card">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-credit-card payment-icon text-success"></i>
+                                    <div>
+                                        <h6 class="mb-1">Credit/Debit Card</h6>
+                                        <p class="small text-muted mb-0">Pay with your card</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="payment-method" data-method="cash">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-money-bill-wave payment-icon text-warning"></i>
+                                    <div>
+                                        <h6 class="mb-1">Cash</h6>
+                                        <p class="small text-muted mb-0">Pay with cash</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="payment-method" data-method="upi">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-mobile-alt payment-icon text-info"></i>
+                                    <div>
+                                        <h6 class="mb-1">UPI</h6>
+                                        <p class="small text-muted mb-0">Pay using UPI ID</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6>Ride Summary</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Pickup:</small>
+                                    <p id="summaryPickup" class="mb-1">-</p>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Destination:</small>
+                                    <p id="summaryDestination" class="mb-1">-</p>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Ride Type:</small>
+                                    <p id="summaryRideType" class="mb-1">-</p>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Estimated Fare:</small>
+                                    <p id="summaryFare" class="mb-1 fw-bold">-</p>
+                                </div>
+                                <div class="col-12">
+                                    <small class="text-muted">Payment Method:</small>
+                                    <p id="summaryPayment" class="mb-1">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmRideBtn">Confirm Ride</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ride History Modal -->
+    <div class="modal fade" id="rideHistoryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ride History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Ride ID</th>
+                                    <th>Date</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Ride Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <!-- History will be dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Profile Modal -->
+    <div class="modal fade" id="updateProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="fullName" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="fullName" value="John Doe">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" value="john.doe@example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="tel" class="form-control" id="phone" value="+1 (555) 123-4567">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveProfileBtn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Modal -->
+    <div class="modal fade" id="supportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Contact Support</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="supportSubject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="supportSubject" placeholder="Enter subject">
+                    </div>
+                    <div class="mb-3">
+                        <label for="supportMessage" class="form-label">Message</label>
+                        <textarea class="form-control" id="supportMessage" rows="5" placeholder="Describe your issue"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="sendSupportBtn">Send Message</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // User profile data
+        let userProfile = {
+            fullName: 'John Doe',
+            email: 'john.doe@example.com',
+            phone: '+1 (555) 123-4567'
+        };
+
+        // Ride data storage
+        let rides = [
+            {
+                id: 'RID-001',
+                date: '2024-01-15',
+                pickup: 'Central Station',
+                destination: 'Airport',
+                type: 'Comfort',
+                amount: '$24.99',
+                status: 'completed',
+                paymentMethod: 'Credit Card'
+            },
+            {
+                id: 'RID-002',
+                date: '2024-01-10',
+                pickup: 'Home',
+                destination: 'Office',
+                type: 'Economy',
+                amount: '$15.50',
+                status: 'completed',
+                paymentMethod: 'Cash'
+            }
+        ];
+
+        $(document).ready(function() {
+            // Initialize modals
+            const newRideModal = new bootstrap.Modal(document.getElementById('newRideModal'));
+            const rideHistoryModal = new bootstrap.Modal(document.getElementById('rideHistoryModal'));
+            const updateProfileModal = new bootstrap.Modal(document.getElementById('updateProfileModal'));
+            const supportModal = new bootstrap.Modal(document.getElementById('supportModal'));
+
+            // Initialize user profile display
+            updateUserProfileDisplay();
+
+            // Load initial rides
+            updateRidesTable();
+            updateStats();
+
+            // Quick action button handlers
+            $('#newRideBtn').click(function() {
+                newRideModal.show();
+            });
+            
+            $('#rideHistoryBtn').click(function() {
+                updateHistoryModal();
+                rideHistoryModal.show();
+            });
+            
+            $('#updateProfileBtn').click(function() {
+                // Load current profile data into form
+                $('#fullName').val(userProfile.fullName);
+                $('#email').val(userProfile.email);
+                $('#phone').val(userProfile.phone);
+                updateProfileModal.show();
+            });
+            
+            $('#supportBtn').click(function() {
+                supportModal.show();
+            });
+
+            // Refresh rides button
+            $('#refreshRidesBtn').click(function() {
+                updateRidesTable();
+                updateStats();
+                $(this).find('i').addClass('fa-spin');
+                setTimeout(() => {
+                    $(this).find('i').removeClass('fa-spin');
+                }, 1000);
+            });
+
+            // Ride option selection and summary update
+            $('.ride-option').click(function() {
+                $('.ride-option').removeClass('selected');
+                $(this).addClass('selected');
+                updateRideSummary();
+            });
+
+            // Payment method selection
+            $('.payment-method').click(function() {
+                $('.payment-method').removeClass('selected');
+                $(this).addClass('selected');
+                updateRideSummary();
+            });
+
+            // Update ride summary when inputs change
+            $('#pickupLocation, #destination').on('input', updateRideSummary);
+
+            // Initialize summary
+            updateRideSummary();
+
+            // Scanner activation
+            $('#activateScannerBtn').click(function() {
+                const scanner = $('.scanner');
+                scanner.css('background', 'linear-gradient(45deg, #007bff, #0056b3)');
+                scanner.html('<i class="fas fa-check fa-3x text-white"></i>');
+                
+                // Automatically select QR payment method
+                $('.payment-method').removeClass('selected');
+                $('.payment-method[data-method="credit-card"]').addClass('selected');
+                
+                setTimeout(() => {
+                    scanner.css('background', 'linear-gradient(45deg, #e0e0e0, #f5f5f5)');
+                    scanner.html('<i class="fas fa-qrcode fa-3x text-muted"></i>');
+                    updateRideSummary();
+                }, 2000);
+            });
+
+            function updateRideSummary() {
+                const pickup = $('#pickupLocation').val();
+                const destination = $('#destination').val();
+                const selectedRide = $('.ride-option.selected');
+                const rideType = selectedRide.data('type');
+                const price = selectedRide.data('price');
+                const selectedPayment = $('.payment-method.selected');
+                const paymentMethod = selectedPayment.data('method');
+
+                $('#summaryPickup').text(pickup || '-');
+                $('#summaryDestination').text(destination || '-');
+                $('#summaryRideType').text(rideType ? rideType.charAt(0).toUpperCase() + rideType.slice(1) : '-');
+                $('#summaryFare').text(price ? `$${price}.00` : '-');
+                
+                // Format payment method for display
+                let paymentText = '-';
+                if (paymentMethod === 'pay-after-ride') paymentText = 'Pay After Ride';
+                else if (paymentMethod === 'credit-card') paymentText = 'Credit/Debit Card';
+                else if (paymentMethod === 'cash') paymentText = 'Cash';
+                else if (paymentMethod === 'upi') paymentText = 'UPI';
+                
+                $('#summaryPayment').text(paymentText);
+            }
+
+            // Confirm ride button
+            $('#confirmRideBtn').click(function() {
+                const pickup = $('#pickupLocation').val();
+                const destination = $('#destination').val();
+                const rideType = $('.ride-option.selected').data('type');
+                const rideTime = $('#rideTime').val();
+                const paymentMethod = $('.payment-method.selected').data('method');
+                
+                if (!pickup || !destination || !rideType || !paymentMethod) {
+                    alert('Please fill in all required fields and select a ride type and payment method');
+                    return;
+                }
+                
+                // Generate new ride ID
+                const newRideId = 'RID-' + String(rides.length + 1).padStart(3, '0');
+                
+                // Format payment method for display
+                let paymentText = '';
+                if (paymentMethod === 'pay-after-ride') paymentText = 'Pay After Ride';
+                else if (paymentMethod === 'credit-card') paymentText = 'Credit Card';
+                else if (paymentMethod === 'cash') paymentText = 'Cash';
+                else if (paymentMethod === 'upi') paymentText = 'UPI';
+                
+                // Add new ride with "confirmed" status
+                const newRide = {
+                    id: newRideId,
+                    date: new Date().toISOString().split('T')[0],
+                    pickup: pickup,
+                    destination: destination,
+                    type: rideType.charAt(0).toUpperCase() + rideType.slice(1),
+                    amount: `$${$('.ride-option.selected').data('price')}.00`,
+                    status: 'confirmed',
+                    paymentMethod: paymentText
+                };
+                
+                rides.unshift(newRide); // Add to beginning of array
+                
+                // Show confirmation banner
+                $('#confirmationDetails').html(`
+                    Ride ID: <strong>${newRideId}</strong> | 
+                    From: <strong>${pickup}</strong> | 
+                    To: <strong>${destination}</strong> |
+                    Payment: <strong>${paymentText}</strong> |
+                    Status: <span class="badge status-confirmed">Confirmed</span>
+                `);
+                $('#confirmationBanner').fadeIn();
+                
+                // Hide banner after 5 seconds
+                setTimeout(() => {
+                    $('#confirmationBanner').fadeOut();
+                }, 5000);
+                
+                // Update table and stats
+                updateRidesTable();
+                updateStats();
+                
+                // Close modal and reset form
+                newRideModal.hide();
+                setTimeout(() => {
+                    $('#pickupLocation').val('Nagasandra');
+                    $('#destination').val('International Airport Terminal 2');
+                    $('.ride-option').removeClass('selected');
+                    $('.payment-method').removeClass('selected');
+                    $('#rideTime').val('2025-11-20T04:23');
+                    updateRideSummary();
+                }, 500);
+            });
+
+            // Save profile button
+            $('#saveProfileBtn').click(function() {
+                // Update user profile
+                userProfile.fullName = $('#fullName').val();
+                userProfile.email = $('#email').val();
+                userProfile.phone = $('#phone').val();
+                
+                // Update display
+                updateUserProfileDisplay();
+                
+                alert('Profile updated successfully!');
+                updateProfileModal.hide();
+            });
+
+            // Update user profile display across the dashboard
+            function updateUserProfileDisplay() {
+                $('#userName').text(userProfile.fullName);
+                $('#welcomeMessage').text(`Welcome back, ${userProfile.fullName}!`);
+                
+                // Update avatar initials
+                const initials = userProfile.fullName.split(' ').map(name => name[0]).join('').toUpperCase();
+                $('#userAvatar').text(initials);
+                $('#welcomeAvatar').text(initials);
+            }
+
+            // Send support button
+            $('#sendSupportBtn').click(function() {
+                const subject = $('#supportSubject').val();
+                const message = $('#supportMessage').val();
+                
+                if (!subject || !message) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+                
+                alert('Support request sent! We will get back to you soon.');
+                supportModal.hide();
+            });
+
+            // Update rides table
+            function updateRidesTable() {
+                const tableBody = $('#ridesTableBody');
+                tableBody.empty();
+                
+                rides.forEach(ride => {
+                    const statusClass = `status-${ride.status}`;
+                    const statusText = ride.status.charAt(0).toUpperCase() + ride.status.slice(1);
+                    
+                    tableBody.append(`
+                        <tr>
+                            <td>${ride.id}</td>
+                            <td>${ride.date}</td>
+                            <td>${ride.pickup}</td>
+                            <td>${ride.destination}</td>
+                            <td>${ride.type}</td>
+                            <td>${ride.amount}</td>
+                            <td><span class="badge ${statusClass}">${statusText}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">View</button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            }
+
+            // Update history modal
+            function updateHistoryModal() {
+                const historyBody = $('#historyTableBody');
+                historyBody.empty();
+                
+                rides.forEach(ride => {
+                    const statusClass = `status-${ride.status}`;
+                    const statusText = ride.status.charAt(0).toUpperCase() + ride.status.slice(1);
+                    
+                    historyBody.append(`
+                        <tr>
+                            <td>${ride.id}</td>
+                            <td>${ride.date}</td>
+                            <td>${ride.pickup}</td>
+                            <td>${ride.destination}</td>
+                            <td>${ride.type}</td>
+                            <td>${ride.amount}</td>
+                            <td><span class="badge ${statusClass}">${statusText}</span></td>
+                        </tr>
+                    `);
+                });
+            }
+
+            // Update stats counters
+            function updateStats() {
+                const pendingCount = rides.filter(ride => ride.status === 'confirmed').length;
+                const completedCount = rides.filter(ride => ride.status === 'completed').length;
+                
+                $('#pendingRidesCount').text(pendingCount);
+                $('#confirmedRidesCount').text(completedCount);
+            }
+
+            // Sidebar navigation active state
+            $('.nav-link').on('click', function() {
+                $('.nav-link').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            // Card hover effects
+            $('.dashboard-card').hover(
+                function() {
+                    $(this).addClass('shadow-lg');
+                },
+                function() {
+                    $(this).removeClass('shadow-lg');
+                }
+            );
+
+            // Initialize the page with sample data
+            updateRidesTable();
+            updateStats();
+            updateHistoryModal();
+        });
+    </script>
+</body>
+</html>

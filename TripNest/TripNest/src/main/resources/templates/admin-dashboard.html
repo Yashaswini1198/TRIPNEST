@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - TripNest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4a6bff;
+            --secondary: #ff6b6b;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+        }
+        .sidebar .nav-link {
+            color: #ecf0f1;
+            padding: 12px 20px;
+            margin: 4px 0;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #3498db;
+            color: white;
+            transform: translateX(5px);
+        }
+        .sidebar .nav-link.active {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .dashboard-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            border-radius: 10px;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .stats-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+        .welcome-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        
+        /* Settings and Help Styles */
+        .setting-item {
+            transition: all 0.3s;
+        }
+        .setting-item:hover {
+            background-color: #f8f9fa;
+        }
+        .help-category {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .help-category:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .faq-question {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .faq-question:hover {
+            color: var(--primary);
+        }
+        .cursor-pointer {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-crown me-2"></i>
+                Admin Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3" sec:authorize="isAuthenticated()">
+                    <i class="fas fa-user-shield me-1"></i>
+                    Admin: <span sec:authentication="name">Admin User</span>
+                </span>
+                <a th:href="@{/auth/logout}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <div class="text-white p-3">
+                            <i class="fas fa-user-shield fa-2x mb-2"></i>
+                            <h6 class="mb-0">Administrator</h6>
+                            <small>Super User</small>
+                        </div>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" th:href="@{/admin/dashboard}">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/users}">
+                                <i class="fas fa-users me-2"></i>
+                                Users Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/bookings}">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                Bookings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/products}">
+                                <i class="fas fa-box me-2"></i>
+                                Products
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/reports}">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/statistics}">
+                                <i class="fas fa-chart-pie me-2"></i>
+                                Statistics
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Welcome Header -->
+                <div class="welcome-header p-4 my-4">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h2 class="mb-1"><i class="fas fa-gem me-2"></i>Welcome to Admin Panel</h2>
+                            <p class="mb-0">Manage your application efficiently and effectively</p>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shield-alt fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="row">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card dashboard-card border-left-primary shadow h-100 py-2" style="border-left: 4px solid #4e73df;">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Total Users
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">15</div>
+                                        <div class="mt-2">
+                                            <span class="text-success small">
+                                                <i class="fas fa-arrow-up me-1"></i>
+                                                5.2%
+                                            </span>
+                                            <span class="text-muted small">Since last month</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-users stats-icon text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card dashboard-card border-left-success shadow h-100 py-2" style="border-left: 4px solid #1cc88a;">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            Approved Drivers
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">4</div>
+                                        <div class="mt-2">
+                                            <span class="text-warning small">
+                                                <i class="fas fa-minus me-1"></i>
+                                                0%
+                                            </span>
+                                            <span class="text-muted small">No change</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-car stats-icon text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card dashboard-card border-left-warning shadow h-100 py-2" style="border-left: 4px solid #f6c23e;">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                            Pending Bookings
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                                        <div class="mt-2">
+                                            <span class="text-success small">
+                                                <i class="fas fa-check me-1"></i>
+                                                All processed
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-shopping-cart stats-icon text-warning"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card dashboard-card border-left-info shadow h-100 py-2" style="border-left: 4px solid #36b9cc;">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                            Pending Drivers
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                                        <div class="mt-2">
+                                            <span class="text-danger small">
+                                                <i class="fas fa-arrow-down me-1"></i>
+                                                1.2%
+                                            </span>
+                                            <span class="text-muted small">Since last month</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-user-clock stats-icon text-info"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-lg-2 col-md-4 col-6 mb-3">
+                                        <a th:href="@{/admin/users/add}" class="btn btn-outline-primary btn-lg p-3 w-100 h-100">
+                                            <i class="fas fa-user-plus fa-2x mb-2"></i><br>
+                                            Add User
+                                        </a>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6 mb-3">
+                                        <a th:href="@{/admin/products/add}" class="btn btn-outline-success btn-lg p-3 w-100 h-100">
+                                            <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
+                                            Add Product
+                                        </a>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6 mb-3">
+                                        <a th:href="@{/admin/bookings}" class="btn btn-outline-warning btn-lg p-3 w-100 h-100">
+                                            <i class="fas fa-file-invoice-dollar fa-2x mb-2"></i><br>
+                                            View Orders
+                                        </a>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6 mb-3">
+                                        <a th:href="@{/admin/reports}" class="btn btn-outline-info btn-lg p-3 w-100 h-100">
+                                            <i class="fas fa-chart-line fa-2x mb-2"></i><br>
+                                            Reports
+                                        </a>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6 mb-3">
+                                        <a href="#settings-content" class="btn btn-outline-dark btn-lg p-3 w-100 h-100" onclick="toggleSettings()">
+                                            <i class="fas fa-cogs fa-2x mb-2"></i><br>
+                                            Settings
+                                        </a>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-6 mb-3">
+                                        <a href="#help-content" class="btn btn-outline-danger btn-lg p-3 w-100 h-100" onclick="toggleHelp()">
+                                            <i class="fas fa-question-circle fa-2x mb-2"></i><br>
+                                            Help
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="m-0 font-weight-bold text-primary">
+                                        <i class="fas fa-cogs me-2"></i>Settings
+                                    </h5>
+                                    <button class="btn btn-sm btn-outline-primary" id="toggle-settings" onclick="toggleSettings()">
+                                        Show Settings
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body" id="settings-content" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="setting-item mb-3 p-3 border rounded">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">Email Notifications</h6>
+                                                    <p class="mb-0 text-muted small">Receive email notifications for important updates</p>
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="setting-item mb-3 p-3 border rounded">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">Dark Mode</h6>
+                                                    <p class="mb-0 text-muted small">Switch to dark mode for better visibility</p>
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="darkMode">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="setting-item mb-3 p-3 border rounded">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">Two-Factor Authentication</h6>
+                                                    <p class="mb-0 text-muted small">Add extra security to your account</p>
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="twoFactorAuth" checked>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="setting-item mb-3 p-3 border rounded">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">Auto Backup</h6>
+                                                    <p class="mb-0 text-muted small">Automatically backup data weekly</p>
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="autoBackup">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="setting-item p-3 border rounded">
+                                            <h6 class="mb-2">Language</h6>
+                                            <select class="form-select form-select-sm">
+                                                <option>English</option>
+                                                <option>Spanish</option>
+                                                <option>French</option>
+                                                <option>German</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="setting-item p-3 border rounded">
+                                            <h6 class="mb-2">Timezone</h6>
+                                            <select class="form-select form-select-sm">
+                                                <option>UTC</option>
+                                                <option>EST</option>
+                                                <option>PST</option>
+                                                <option>CST</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-12 text-end">
+                                        <button class="btn btn-primary">Save Settings</button>
+                                        <button class="btn btn-outline-secondary">Reset to Default</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Section -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="m-0 font-weight-bold text-primary">
+                                        <i class="fas fa-question-circle me-2"></i>Help & Support
+                                    </h5>
+                                    <button class="btn btn-sm btn-outline-primary" id="toggle-help" onclick="toggleHelp()">
+                                        Show Help
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body" id="help-content" style="display: none;">
+                                <div class="row mb-4">
+                                    <div class="col-md-3 col-6 mb-3">
+                                        <div class="help-category text-center p-3 border rounded cursor-pointer" onclick="showHelpCategory('Documentation')">
+                                            <i class="fas fa-book fa-2x text-primary mb-2"></i>
+                                            <h6>Documentation</h6>
+                                            <p class="small text-muted mb-0">Read our detailed guides</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-3">
+                                        <div class="help-category text-center p-3 border rounded cursor-pointer" onclick="showHelpCategory('Tutorials')">
+                                            <i class="fas fa-video fa-2x text-success mb-2"></i>
+                                            <h6>Tutorials</h6>
+                                            <p class="small text-muted mb-0">Watch video tutorials</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-3">
+                                        <div class="help-category text-center p-3 border rounded cursor-pointer" onclick="showHelpCategory('Community')">
+                                            <i class="fas fa-comments fa-2x text-warning mb-2"></i>
+                                            <h6>Community</h6>
+                                            <p class="small text-muted mb-0">Join our community forum</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-3">
+                                        <div class="help-category text-center p-3 border rounded cursor-pointer" onclick="showHelpCategory('Contact Support')">
+                                            <i class="fas fa-headset fa-2x text-danger mb-2"></i>
+                                            <h6>Contact Support</h6>
+                                            <p class="small text-muted mb-0">Get help from our team</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h6 class="mb-3">Frequently Asked Questions</h6>
+                                <div class="faq-item mb-3 p-3 border rounded">
+                                    <div class="faq-question d-flex justify-content-between align-items-center cursor-pointer" onclick="toggleFAQ(this)">
+                                        <strong>How do I reset my password?</strong>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="faq-answer mt-2 text-muted small" style="display: none;">
+                                        To reset your password, go to the Settings page and click on the "Security" tab. From there, you can change your password by following the on-screen instructions.
+                                    </div>
+                                </div>
+                                
+                                <div class="faq-item mb-3 p-3 border rounded">
+                                    <div class="faq-question d-flex justify-content-between align-items-center cursor-pointer" onclick="toggleFAQ(this)">
+                                        <strong>How can I add a new user?</strong>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="faq-answer mt-2 text-muted small" style="display: none;">
+                                        You can add a new user by clicking on the "Add User" button in the Quick Actions section or by navigating to the Users page and clicking the "Add New User" button.
+                                    </div>
+                                </div>
+                                
+                                <div class="faq-item mb-3 p-3 border rounded">
+                                    <div class="faq-question d-flex justify-content-between align-items-center cursor-pointer" onclick="toggleFAQ(this)">
+                                        <strong>Where can I view my reports?</strong>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="faq-answer mt-2 text-muted small" style="display: none;">
+                                        Reports can be accessed by clicking on the "Reports" option in the Quick Actions section or by navigating to the Analytics page from the sidebar.
+                                    </div>
+                                </div>
+                                
+                                <div class="faq-item mb-3 p-3 border rounded">
+                                    <div class="faq-question d-flex justify-content-between align-items-center cursor-pointer" onclick="toggleFAQ(this)">
+                                        <strong>How do I export my data?</strong>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="faq-answer mt-2 text-muted small" style="display: none;">
+                                        To export your data, go to the Reports section and use the export options available at the top of each report. You can export data in CSV, PDF, or Excel formats.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toggle settings section
+        function toggleSettings() {
+            const settingsContent = document.getElementById('settings-content');
+            const toggleButton = document.getElementById('toggle-settings');
+            const isVisible = settingsContent.style.display === 'block';
+            
+            settingsContent.style.display = isVisible ? 'none' : 'block';
+            toggleButton.textContent = isVisible ? 'Show Settings' : 'Hide Settings';
+            
+            // Smooth scroll to settings if opening
+            if (!isVisible) {
+                setTimeout(() => {
+                    settingsContent.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            }
+        }
+        
+        // Toggle help section
+        function toggleHelp() {
+            const helpContent = document.getElementById('help-content');
+            const toggleButton = document.getElementById('toggle-help');
+            const isVisible = helpContent.style.display === 'block';
+            
+            helpContent.style.display = isVisible ? 'none' : 'block';
+            toggleButton.textContent = isVisible ? 'Show Help' : 'Hide Help';
+            
+            // Smooth scroll to help if opening
+            if (!isVisible) {
+                setTimeout(() => {
+                    helpContent.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            }
+        }
+        
+        // Toggle FAQ answers
+        function toggleFAQ(element) {
+            const answer = element.nextElementSibling;
+            const icon = element.querySelector('i');
+            const isVisible = answer.style.display === 'block';
+            
+            answer.style.display = isVisible ? 'none' : 'block';
+            
+            if (isVisible) {
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            }
+        }
+        
+        // Show help category
+        function showHelpCategory(category) {
+            alert(`Redirecting to ${category} section`);
+            // In a real application, you would navigate to the appropriate page
+        }
+        
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - TripNest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .booking-card {
+            border-left: 4px solid #007bff;
+        }
+        .completed-booking {
+            border-left-color: #28a745;
+        }
+        .upcoming-booking {
+            border-left-color: #ffc107;
+        }
+        .cancelled-booking {
+            border-left-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">TripNest</a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3" th:if="${user != null}" th:text="'Welcome, ' + ${user.firstName} + '!'"></span>
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+                <a class="nav-link" href="/booking/book-ride">Book Ride</a>
+                <a class="nav-link" href="/user/profile">Profile</a>
+                <a class="nav-link" href="/user/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h2>My Bookings</h2>
+                <p class="text-muted">Manage your ride bookings and view history</p>
+            </div>
+        </div>
+
+        <!-- Upcoming Bookings -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h4>Upcoming Rides</h4>
+                
+                <div class="card booking-card upcoming-booking mb-3">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="card-title">Airport Transfer</h5>
+                                <p class="card-text mb-1">
+                                    <strong>From:</strong> Home Address<br>
+                                    <strong>To:</strong> International Airport<br>
+                                    <strong>Ride Type:</strong> Comfort<br>
+                                    <strong>Date:</strong> Tomorrow, 2:00 PM
+                                </p>
+                                <span class="badge bg-warning text-dark">Upcoming</span>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <button class="btn btn-outline-danger btn-sm">Cancel</button>
+                                <button class="btn btn-outline-primary btn-sm">Modify</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card booking-card upcoming-booking mb-3">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="card-title">City Center Trip</h5>
+                                <p class="card-text mb-1">
+                                    <strong>From:</strong> Office<br>
+                                    <strong>To:</strong> Downtown Mall<br>
+                                    <strong>Ride Type:</strong> Economy<br>
+                                    <strong>Date:</strong> Friday, 6:30 PM
+                                </p>
+                                <span class="badge bg-warning text-dark">Upcoming</span>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <button class="btn btn-outline-danger btn-sm">Cancel</button>
+                                <button class="btn btn-outline-primary btn-sm">Modify</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Past Bookings -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h4>Past Rides</h4>
+                
+                <div class="card booking-card completed-booking mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="card-title">Business Meeting</h5>
+                                <p class="card-text mb-1">
+                                    <strong>From:</strong> Hotel<br>
+                                    <strong>To:</strong> Business District<br>
+                                    <strong>Ride Type:</strong> Premium<br>
+                                    <strong>Date:</strong> November 10, 2024 - 9:00 AM<br>
+                                    <strong>Driver:</strong> John D. ⭐⭐⭐⭐⭐
+                                </p>
+                                <span class="badge bg-success">Completed</span>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <p class="h5 text-success">$45.00</p>
+                                <button class="btn btn-outline-info btn-sm">View Details</button>
+                                <button class="btn btn-outline-secondary btn-sm">Book Again</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card booking-card completed-booking mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="card-title">Weekend Shopping</h5>
+                                <p class="card-text mb-1">
+                                    <strong>From:</strong> Home<br>
+                                    <strong>To:</strong> Shopping Center<br>
+                                    <strong>Ride Type:</strong> Economy<br>
+                                    <strong>Date:</strong> November 8, 2024 - 11:30 AM<br>
+                                    <strong>Driver:</strong> Sarah M. ⭐⭐⭐⭐
+                                </p>
+                                <span class="badge bg-success">Completed</span>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <p class="h5 text-success">$18.50</p>
+                                <button class="btn btn-outline-info btn-sm">View Details</button>
+                                <button class="btn btn-outline-secondary btn-sm">Book Again</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Bookings Message (hidden when there are bookings) -->
+        <div class="row mt-4" id="noBookings" style="display: none;">
+            <div class="col-12">
+                <div class="card text-center">
+                    <div class="card-body py-5">
+                        <h5 class="card-title">No bookings yet</h5>
+                        <p class="card-text">You haven't made any bookings yet. Start by booking your first ride!</p>
+                        <a href="/booking/book-ride" class="btn btn-primary">Book Your First Ride</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <a href="/dashboard" class="btn btn-outline-secondary w-100">Back to Dashboard</a>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <a href="/booking/book-ride" class="btn btn-primary w-100">Book New Ride</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple script to show/hide no bookings message
+        document.addEventListener('DOMContentLoaded', function() {
+            const upcomingBookings = document.querySelectorAll('.upcoming-booking');
+            const pastBookings = document.querySelectorAll('.completed-booking');
+            const noBookingsDiv = document.getElementById('noBookings');
+            
+            // Show no bookings message if there are no bookings at all
+            if (upcomingBookings.length === 0 && pastBookings.length === 0) {
+                noBookingsDiv.style.display = 'block';
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
